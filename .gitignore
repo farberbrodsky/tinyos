@@ -26,7 +26,7 @@
 *.a
 *.lib
 
-# Executables
-*.exe
-*.out
-*.app
+tinyos.bin
+tinyos.iso
+usr
+isodir
