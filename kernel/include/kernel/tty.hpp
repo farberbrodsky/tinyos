@@ -1,5 +1,5 @@
 #pragma once
-#include <stdint.h>
+#include <kernel/util.hpp>
 #include <util/string.hpp>
 
 namespace tty {
@@ -24,6 +24,19 @@ namespace tty {
 
     void initialize();
     void set_color(color fg, color bg);
-    void putc(char c);
+
+    void write(char c);
     void write(const string_buf &s);
+
+    // variadic version
+    inline void __write_rec() {}
+    template <class T, class... Args>
+    inline void __write_rec(T t, Args... args) {
+        tty::write(t);
+        tty::__write_rec(args...);
+    }
+    template <class... Args>
+    inline void write(Args... args) {
+        tty::__write_rec(args...);
+    }
 }

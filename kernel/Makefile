@@ -16,7 +16,9 @@ LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
 
 KERNEL_OBJS=\
 $(KERNEL_ARCH_OBJS) \
-core/main.o \
+util/kassert.o \
+util/str_util.o \
+core/main.o
 
 OBJS=\
 $(ARCHDIR)/crti.o \

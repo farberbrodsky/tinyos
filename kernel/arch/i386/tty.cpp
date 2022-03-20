@@ -3,7 +3,7 @@
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
-static volatile uint16_t *VGA_MEMORY = (uint16_t *)0xb8000;
+static volatile uint16_t *VGA_MEMORY = (uint16_t *)0xc03ff000;
 
 static size_t t_x;
 static size_t t_y;
@@ -38,7 +38,7 @@ void tty::set_color(color fg, color bg) {
     t_color = vga_color(fg, bg);
 }
 
-void tty::putc(char c) {
+void tty::write(char c) {
     if (c == '\n') {
         t_x = 0;
         if (++t_y == VGA_HEIGHT) {
@@ -60,6 +60,6 @@ void tty::putc(char c) {
 
 void tty::write(const string_buf &s) {
     for (size_t i = 0; i < s.length; i++) {
-        putc(s.data[i]);
+        write(s.data[i]);
     }
 }
