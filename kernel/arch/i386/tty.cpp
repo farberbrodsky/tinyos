@@ -57,9 +57,3 @@ void tty::write(char c) {
         }
     }
 }
-
-void tty::write(const string_buf &s) {
-    for (size_t i = 0; i < s.length; i++) {
-        write(s.data[i]);
-    }
-}

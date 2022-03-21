@@ -26,7 +26,17 @@ namespace tty {
     void set_color(color fg, color bg);
 
     void write(char c);
-    void write(const string_buf &s);
+
+    inline void write(const string_buf &s) {
+        for (size_t i = 0; i < s.length; i++) {
+            write(s.data[i]);
+        }
+    }
+    inline void write(int val) {
+        char buf[INT_TO_STR_BUF_SIZE];
+        str_util::from(val, buf);
+        tty::write(buf);
+    }
 
     // variadic version
     inline void __write_rec() {}

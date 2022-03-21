@@ -27,10 +27,10 @@ size_t str_util::from(int val, char *out) {
     }
 
     // reverse the string
-    for (size_t j = negative; j < i; j++) {
+    for (size_t j = 0; j < (i >> 1); j++) {
         char tmp = out[j];
-        out[j] = out[i - j - 1 + negative];
-        out[i - j - 1 + negative] = tmp;
+        out[j] = out[i - j - 1];
+        out[i - j - 1] = tmp;
     }
 
     out[i] = '\0';
