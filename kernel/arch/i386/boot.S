@@ -36,18 +36,13 @@ _start:
 	# Physical address of boot_page_table1.
 	movl $(boot_page_table1 - 0xC0000000), %edi
 	# First address to map is address 0.
-	# TODO: Start at the first kernel page instead. Alternatively map the first
-	#       1 MiB as it can be generally useful, and there's no need to
-	#       specially map the VGA buffer.
 	movl $0, %esi
-	# Map 1023 pages. The 1024th will be the VGA text buffer.
-	movl $1023, %ecx
+	# Map 1024 pages
+	movl $1024, %ecx
 	# TODO: support a kernel more than 4mb
 
 1:
-	# Only map the kernel.
-	cmpl $_kernel_start, %esi
-	jl 2f
+	# start mapping from 0 - yes, there are some unnecessary pages here
 	cmpl $(_kernel_end - 0xC0000000), %esi
 	jge 3f
 
@@ -57,7 +52,6 @@ _start:
 	orl $0x003, %edx
 	movl %edx, (%edi)
 
-2:
 	# Size of page is 4096 bytes.
 	addl $4096, %esi
 	# Size of entries in boot_page_table1 is 4 bytes.
@@ -66,9 +60,6 @@ _start:
 	loop 1b
 
 3:
-	# Map VGA video memory to 0xC03FF000 as "present, writable".
-	movl $(0x000B8000 | 0x003), boot_page_table1 - 0xC0000000 + 1023 * 4
-
 	# The page table is used at both page directory entry 0 (virtually from 0x0
 	# to 0x3FFFFF) (thus identity mapping the kernel) and page directory entry
 	# 768 (virtually from 0xC0000000 to 0xC03FFFFF) (thus mapping it in the
@@ -109,4 +100,6 @@ _start:
 	mov $stack_top, %esp
 
 	# Enter the high-level kernel.
+	pushl %eax
+	pushl %ebx
 	call kernel_main

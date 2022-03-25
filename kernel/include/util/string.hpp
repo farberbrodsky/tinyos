@@ -20,4 +20,5 @@ struct string_buf {
 namespace str_util {
     // returns length of string
     size_t from(int val, char *out);
+    size_t hex(void *val, char *out);
 }

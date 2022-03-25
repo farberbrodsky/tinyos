@@ -22,9 +22,16 @@ namespace tty {
         white = 15
     };
 
+    enum class mode {
+        null = 0,
+        hex = 1
+    };
+
     void initialize();
     void set_color(color fg, color bg);
 
+    void add_mode(mode m);
+    void remove_mode(mode m);
     void write(char c);
 
     inline void write(const string_buf &s) {
@@ -32,11 +39,7 @@ namespace tty {
             write(s.data[i]);
         }
     }
-    inline void write(int val) {
-        char buf[INT_TO_STR_BUF_SIZE];
-        str_util::from(val, buf);
-        tty::write(buf);
-    }
+    void write(int val);
 
     // variadic version
     inline void __write_rec() {}

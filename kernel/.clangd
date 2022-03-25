@@ -1,2 +1,2 @@
 CompileFlags:
-    Add: [-xc++, -Wall, -Wextra, -Iinclude, -I../include, -I../../include, -I../../../include]
+    Add: [-xc++, -m32, -Wall, -Wextra, -Iinclude, -I../include, -I../../include, -I../../../include]
