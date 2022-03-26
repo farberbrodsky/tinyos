@@ -8,11 +8,11 @@ namespace paging {
     void *lookup_page(void *addr);
     // only addr
     void *lookup_physical_addr(void *addr);
-    void map_page(void *phys, void *virt, uint flags, bool is_page_table = false);
+    void map_page(uintptr_t phys, void *virt, uint flags);  // phys=0xFFFFFFFF for keeping same phys
     void unmap_page(void *virt);
     void *allocate_lmem(uint flags);  // allocates both physical and virtual addresses, in low memory (identity)
     void *allocate(uint flags);       // allocates both physical and virtual addresses
-    void *allocate_virt(uint flags);  // allocates only a virtual address, returns it for use in map_page
+    void *allocate_virt();            // allocates only a virtual address, returns it for use in map_page
     void free_lmem(void *virt);
     void free(void *virt);
 

@@ -29,6 +29,18 @@ void kernel_main(multiboot_info_t *mbd, unsigned int magic) {
     tty::write("Hello world!\nAAAAAAAA\n");
     tty::write(tty::hex{ram_amount}, " bytes of ram\n");
 
+    quality_debugging();
+    int i = 0;
+    while (true) {
+        tty::write(i++, '\n');
+        void *page = paging::allocate((uint)paging::page_flag::write | (uint)paging::page_flag::present);
+        tty::write(tty::hex{page}, '\n');
+        ((uint *)page)[10] = 7;
+        if (i % 6 == 0 || i % 7 == 0) {
+            paging::free(page);
+        }
+    }
+
     kassert(13 == 37);
     while (1) asm("pause");
 }

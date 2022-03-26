@@ -30,6 +30,7 @@ namespace tty {
     struct hex {
         uintptr_t val;
         inline explicit hex(uintptr_t val) : val{val} {}
+        inline explicit hex(void *val) : val{(uintptr_t)val} {}
     };
 
     void initialize();
