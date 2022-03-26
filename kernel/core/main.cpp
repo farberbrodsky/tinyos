@@ -27,12 +27,7 @@ void kernel_main(multiboot_info_t *mbd, unsigned int magic) {
     paging::initialize(ram_amount);
 
     tty::write("Hello world!\nAAAAAAAA\n");
-    tty::add_mode(tty::mode::hex);
-    tty::write((int)ram_amount, " bytes of ram\n");
-    tty::remove_mode(tty::mode::hex);
-
-    uint32_t *page = (uint32_t *)paging::allocate_lmem((uint)paging::page_flag::write | (uint)paging::page_flag::present);
-    page[5] = 7;
+    tty::write(tty::hex{ram_amount}, " bytes of ram\n");
 
     kassert(13 == 37);
     while (1) asm("pause");

@@ -27,19 +27,22 @@ namespace tty {
         hex = 1
     };
 
+    struct hex {
+        uintptr_t val;
+        inline explicit hex(uintptr_t val) : val{val} {}
+    };
+
     void initialize();
     void set_color(color fg, color bg);
-
-    void add_mode(mode m);
-    void remove_mode(mode m);
     void write(char c);
+    void write(int val);
+    void write(hex val);
 
     inline void write(const string_buf &s) {
         for (size_t i = 0; i < s.length; i++) {
             write(s.data[i]);
         }
     }
-    void write(int val);
 
     // variadic version
     inline void __write_rec() {}

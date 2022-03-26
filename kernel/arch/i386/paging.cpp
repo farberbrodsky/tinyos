@@ -36,6 +36,11 @@ constexpr void *align_page_up(void *addr) {
     return reinterpret_cast<void *>((((uint32_t)((char *)addr + 4095)) >> 12) << 12);
 }
 
+static inline void flush_tlb() {
+    void *page_dir_phys = phys_of_lmem(page_dir);
+    asm volatile("movl %0, %%cr3" :: "r" (page_dir_phys));
+}
+
 void paging::initialize(uintptr_t ram_amount) {
     // we already initialize the pages in boot.S
     // but I want to have full control of this in the kernel
@@ -64,9 +69,7 @@ void paging::initialize(uintptr_t ram_amount) {
     }
 
     // set this as the page table
-    void *page_dir_phys = phys_of_lmem(page_dir);
-    asm volatile("" ::: "memory");
-    asm volatile("movl %0, %%cr3" :: "r" (page_dir_phys));
+    flush_tlb();
 
     // initialize allocators
     lmem_heap_start = (char *)align_page_up(kernel_end);
@@ -99,7 +102,11 @@ void paging::map_page(void *phys, void *virt, uint flags, bool is_page_table) {
     uint32_t *tab_addr;
     if (dir_entry & (uint)page_flag::present) {
         tab_addr = (uint32_t *)virt_of_lmem((void *)((dir_entry >> 12) << 12));
+        uint32_t tab_entry = tab_addr[tab_index];
         tab_addr[tab_index] = (uint32_t)phys | (uint32_t)flags;
+        if ((uint32_t)tab_entry != tab_addr[tab_index]) {
+            flush_tlb();  // we changed the mapping
+        }
     } else {
         // allocate a new table
         if (!is_page_table) {
@@ -118,10 +125,22 @@ void paging::map_page(void *phys, void *virt, uint flags, bool is_page_table) {
             free_page_table = (uint32_t *)paging::allocate_lmem((uint)page_flag::write | (uint)page_flag::present);
         }
     }
+    // don't need to flush tlb to add a new page
+}
 
-    void *page_dir_phys = phys_of_lmem(page_dir);
-    asm("" ::: "memory");
-    asm("movl %0, %%cr3" :: "r" (page_dir_phys));
+void paging::unmap_page(void *virt) {
+    uint32_t dir_index = (uintptr_t)virt >> 22;
+    uint32_t tab_index = (uintptr_t)virt >> 12 & 0x03FF;
+
+    uint32_t dir_entry = page_dir[dir_index];
+    kassert(dir_entry & (uint)page_flag::present);
+
+    uint32_t *tab_addr = (uint32_t *)virt_of_lmem((void *)((dir_entry >> 12) << 12));
+
+    kassert(tab_addr[tab_index] & (uint)page_flag::present);
+
+    tab_addr[tab_index] = 0;
+    flush_tlb();
 }
 
 void *paging::allocate_lmem(uint flags) {
@@ -138,4 +157,12 @@ void *paging::allocate_lmem(uint flags) {
     // step 2. map phys to virt
     paging::map_page(phys_of_lmem(virt_page), virt_page, flags, true);
     return virt_page;
+}
+
+void paging::free_lmem(void *virt) {
+    // make it writable
+    paging::map_page(phys_of_lmem(virt), virt, (uint)page_flag::write | (uint)page_flag::present, true);
+    *((uintptr_t *)virt) = (uintptr_t)lmem_heap_free;
+    lmem_heap_free = (char *)virt;
+    // don't unmap - this is now part of the linked list
 }

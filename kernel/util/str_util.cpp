@@ -37,7 +37,7 @@ size_t str_util::from(int val, char *out) {
     return i;
 }
 
-size_t str_util::hex(void *val, char *out) {
+size_t str_util::hex(uintptr_t val, char *out) {
     if (val == 0) {
         out[0] = '0';
         out[1] = '\0';
@@ -48,7 +48,7 @@ size_t str_util::hex(void *val, char *out) {
 
     while (val != 0) {
         uint remainder = (uintptr_t)val & 0b1111;
-        val = (void *)((uintptr_t)val >> 4);
+        val = val >> 4;
         if (remainder < 10) {
             out[i++] = '0' + remainder;
         } else {

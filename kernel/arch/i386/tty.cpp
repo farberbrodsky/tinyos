@@ -12,8 +12,6 @@ static volatile uint16_t *t_buf;
 static uint16_t internal_buf[VGA_WIDTH * VGA_HEIGHT];
 size_t internal_buf_i;  // ring buffer
 
-static tty::mode t_mode;
-
 static inline uint8_t vga_color(tty::color fg, tty::color bg) {
     return (uint8_t)fg | ((uint8_t)bg << 4);
 }
@@ -31,7 +29,6 @@ void tty::initialize() {
     t_x = 0;
     t_y = 0;
     internal_buf_i = 0;
-    t_mode = mode::null;
     set_color(color::light_gray, color::black);
     t_buf = VGA_MEMORY;
 	for (size_t y = 0; y < VGA_HEIGHT; y++) {
@@ -43,14 +40,6 @@ void tty::initialize() {
 
 void tty::set_color(color fg, color bg) {
     t_color = vga_color(fg, bg);
-}
-
-void tty::add_mode(tty::mode m) {
-    t_mode = (mode)((uint)t_mode | (uint)m);
-}
-
-void tty::remove_mode(tty::mode m) {
-    t_mode = (mode)((uint)t_mode & ~(uint)m);
 }
 
 static void tty_scroll() {
@@ -89,10 +78,12 @@ void tty::write(char c) {
 
 void tty::write(int val) {
     char buf[INT_TO_STR_BUF_SIZE];
-    if ((uint)t_mode & (uint)mode::hex) {
-        str_util::hex((void *)val, buf);
-    } else {
-        str_util::from(val, buf);
-    }
+    str_util::from(val, buf);
+    tty::write(buf);
+}
+
+void tty::write(hex val) {
+    char buf[INT_TO_STR_BUF_SIZE];
+    str_util::hex(val.val, buf);
     tty::write(buf);
 }
